@@ -5,6 +5,7 @@ export class Validation {
   public static userSignUpValidationSchema = () => {
     return [
       check("firstName")
+        .not()
         .exists()
         .withMessage("firstName is Requiered")
         .isString()
@@ -12,6 +13,7 @@ export class Validation {
         .isLength({ min: 3 })
         .withMessage("Minimum 3 characters required!"),
       check("email")
+        .not()
         .isEmpty()
         .withMessage("Email can not be empty!")
         .normalizeEmail()
@@ -26,8 +28,6 @@ export class Validation {
   ) => {
     try {
       const result = await validationResult(req);
-      console.log(result, "result");
-
       if (result && result.errors.length) {
         let validationErrors = [];
         let obj: any = {};
@@ -35,7 +35,7 @@ export class Validation {
           obj[error.param] = error.msg;
         }
         validationErrors.push(obj);
-        return res.status(400).json({ error: validationResult });
+        return res.status(400).json({ error: validationErrors });
       } else {
         next();
       }
