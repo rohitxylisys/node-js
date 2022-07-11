@@ -4,19 +4,24 @@ import { Response, Request } from "express";
 export class Validation {
   public static userSignUpValidationSchema = () => {
     return [
-      check("firstName")
+      check("firstName", "firstName is Requiered")
         .not()
-        .exists()
-        .withMessage("firstName is Requiered")
+        .isEmpty()
+        .withMessage("firstName required")
+        .bail()
         .isString()
         .withMessage("firstName must be a String")
+        .bail()
         .isLength({ min: 3 })
         .withMessage("Minimum 3 characters required!"),
       check("email")
         .not()
         .isEmpty()
         .withMessage("Email can not be empty!")
+        .bail()
         .normalizeEmail()
+        .toLowerCase()
+        .isEmail()
         .withMessage("Invalid email address!"),
     ];
   };

@@ -3,10 +3,12 @@ import * as dotenv from "dotenv";
 import { Routes } from "./routes";
 import * as bodyParser from "body-parser";
 dotenv.config({});
+import { DbConnection } from "./config/dbConnection";
 
 export class App {
   protected app: express.Application;
   constructor() {
+    const PORT = process.env.SERVER_PORT || 3000;
     const routes = new Routes();
     this.app = express();
     this.app.all("/*", (req, res, next) => {
@@ -25,15 +27,20 @@ export class App {
       }
     });
     this.app.use(bodyParser.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
-    this.app.use(bodyParser.json(), (error, req, res, next) => {
-      if (error) {
-        console.log(error);
-        return res.status(400).json({ error: "Invalid request body" });
+    this.app.use(
+      bodyParser.json(),
+      (error: any, req: any, res: any, next: any) => {
+        if (error) {
+          console.log(error);
+          return res.status(400).json({ error: "Invalid request body" });
+        }
+        next();
       }
-      next();
-    });
+    );
+
+    const database = new DbConnection();
+    database.connect();
     this.app.use("/api/v1", routes.path());
-    const PORT = process.env.SERVER_PORT || 3000;
     this.app.listen(PORT, () => {
       console.log(`server listening on port ----> ${PORT}`);
     });
