@@ -4,6 +4,7 @@ export const Constant = {
   },
   ERROR_MESSAGES: {
     INTERNAL_SERVER_ERROR: "Internal Server Error..!",
+    USER_ALREADY_EXISTENT: "User already exists.",
   },
   RESPONSE_CODES: {
     INTERNAL_SERVER_ERROR: 500,

@@ -2,7 +2,7 @@ import { Sequelize, Model, DataTypes } from "sequelize";
 const dbConfig = require("../../config/config.json");
 
 export class DbConnection {
-  public ENV = process.env.DATABASE;
+  public ENV = process.env.NODE_ENV;
   public connection = dbConfig[this.ENV];
 
   public connect() {
@@ -20,7 +20,7 @@ export class DbConnection {
         },
       }
     );
-    conn.sync({ force: false, alter: true });    
+    conn.sync({ force: false, alter: true });
     return conn;
   }
 }
