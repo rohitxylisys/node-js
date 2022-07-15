@@ -2,12 +2,12 @@ import express from "express";
 import * as dotenv from "dotenv";
 import { Routes } from "./routes";
 import * as bodyParser from "body-parser";
-dotenv.config({});
 import { DbConnection } from "./config/dbConnection";
 
 export class App {
   protected app: express.Application;
   constructor() {
+    dotenv.config({});
     const PORT = process.env.SERVER_PORT || 3000;
     const routes = new Routes();
     this.app = express();

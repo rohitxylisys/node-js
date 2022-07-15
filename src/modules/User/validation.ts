@@ -62,6 +62,43 @@ export class Validation {
     ];
   };
 
+  public static userLoginValidationShema() {
+    return [
+      check("email")
+        .not()
+        .isEmpty()
+        .withMessage("Email is required!")
+        .bail()
+        .normalizeEmail()
+        .toLowerCase()
+        .isEmail()
+        .withMessage("Invalid email address!"),
+      check("password")
+        .not()
+        .isEmpty()
+        .withMessage("password required")
+        .bail()
+        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
+        .withMessage(
+          "password must be at least 8 characters with 1 upper case letter and 1 number"
+        ),
+    ];
+  }
+
+  public static userForgotPasswordValidationShema() {
+    return [
+      check("email")
+        .not()
+        .isEmpty()
+        .withMessage("Email is required!")
+        .bail()
+        .normalizeEmail()
+        .toLowerCase()
+        .isEmail()
+        .withMessage("Invalid email address!"),
+    ];
+  }
+
   public static checkValidation = async (
     req: Request,
     res: Response,
