@@ -47,4 +47,8 @@ export class UserController {
         successResponseHandler(200, Constant.SUCCESS_MESSAGES.LOGIN_SUCCESS)
       );
   };
+
+  public resetPassword = async (req: any, res: Response) => {
+    
+  };
 }

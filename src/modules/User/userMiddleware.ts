@@ -73,7 +73,7 @@ export class UserMiddleware {
           .status(Constant.RESPONSE_CODES.NOT_FOUND)
           .json({ error: Constant.ERROR_MESSAGES.USER_NOT_FOUND });
       } else {
-        const linkToken = await GlobalUtils.generateToken(userIsExist.id);
+        const linkToken = await GlobalUtils.generateToken(userIsExist.id, "1h");
         const resetPasswordLink = `${process.env.DEFAULT_URL}/user/verify-link/${linkToken}`;
 
         const emailData = {
@@ -85,8 +85,17 @@ export class UserMiddleware {
         GlobalUtils.sendMail(emailData);
         next();
       }
+    } catch (error) {
+      return res
+        .status(Constant.RESPONSE_CODES.INTERNAL_SERVER_ERROR)
+        .json({ error: Constant.ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
+    }
+  };
 
-      next();
+  public resetPassword = async (req: any, res: Response, next: any) => {
+    try {
+      const link = req.params.link;
+      console.log(link);
     } catch (error) {
       return res
         .status(Constant.RESPONSE_CODES.INTERNAL_SERVER_ERROR)

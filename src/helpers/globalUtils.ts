@@ -20,8 +20,10 @@ export class GlobalUtils {
     return isPasswordCorrect;
   };
 
-  public static generateToken = async (data: any) => {
-    return jwt.sign(data, process.env.TOKEN_SECRET_KEY);
+  public static generateToken = async (data: any, expire?: string) => {
+    return jwt.sign(data, process.env.TOKEN_SECRET_KEY, {
+      expiresIn: expire ? expire : "",
+    });
   };
 
   public static sendMail(data: any) {

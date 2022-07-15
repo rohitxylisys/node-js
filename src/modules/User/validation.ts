@@ -99,6 +99,31 @@ export class Validation {
     ];
   }
 
+  public static userResetPasswordValidationShema() {
+    return [
+      check("password")
+        .not()
+        .isEmpty()
+        .withMessage("password required")
+        .bail()
+        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
+        .withMessage(
+          "password must be at least 8 characters with 1 upper case letter and 1 number"
+        ),
+
+      check("confirmPassword")
+        .custom(async (value: any, { req }: any) => {
+          const password = await req.body.password;
+          if (password !== value) {
+            throw new Error("password and confirmPassword must be same");
+          }
+        })
+        .not()
+        .isEmpty()
+        .withMessage("confirmPassword required"),
+    ];
+  }
+
   public static checkValidation = async (
     req: Request,
     res: Response,

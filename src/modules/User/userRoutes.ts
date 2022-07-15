@@ -28,4 +28,11 @@ router.post(
   userMiddleware.forgotPassword,
   userController.forgotPassword
 );
+
+router.post(
+  "/reset-password/:link",
+  Validation.userResetPasswordValidationShema(),
+  userMiddleware.resetPassword,
+  userController.resetPassword
+);
 export const UserRoutes: Router = router;
