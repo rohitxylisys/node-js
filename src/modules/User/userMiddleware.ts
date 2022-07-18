@@ -36,6 +36,7 @@ export class UserMiddleware {
           .json({ error: Constant.ERROR_MESSAGES.USER_NOT_FOUND });
       } else {
         const checkPassword = await GlobalUtils.comparePassword(
+          req.body.password,
           userIsExist.password
         );
         if (!checkPassword) {
@@ -43,22 +44,27 @@ export class UserMiddleware {
             .status(Constant.RESPONSE_CODES.BAD_REQUEST)
             .json({ error: Constant.ERROR_MESSAGES.PASSWORD_WRONG });
         }
-        const userToken = await GlobalUtils.generateToken(userIsExist);
-        userIsExist.token = userToken;
-        await UserUtils.updateDetails(
-          { token: userToken },
-          { email: req.body.email }
-        );
-        const emailData = {
-          to: `${userIsExist.email}`,
-          subject: "Login Successfully",
-          html: `<h1>Welcome</h1> ${userIsExist.firstName} ${userIsExist.lastName} </br>`,
-        };
-        GlobalUtils.sendMail(emailData);
-        req.user = userIsExist;
-        next();
+
+        const tokenData = await UserUtils.getTokenFiled(userIsExist);
+        const userToken = await GlobalUtils.generateToken(tokenData);
+        if (userToken) {
+          await UserUtils.updateDetails(
+            { token: userToken },
+            { email: req.body.email }
+          );
+          const emailData = {
+            to: `${userIsExist.email}`,
+            subject: "Login Successfully",
+            html: `<h1>Welcome</h1> ${userIsExist.firstName} ${userIsExist.lastName} </br>`,
+          };
+          GlobalUtils.sendMail(emailData);
+          userIsExist.token = userToken;
+          req.user = userIsExist;
+          next();
+        }
       }
     } catch (error) {
+      console.log(error);
       return res
         .status(Constant.RESPONSE_CODES.INTERNAL_SERVER_ERROR)
         .json({ error: Constant.ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
@@ -73,9 +79,11 @@ export class UserMiddleware {
           .status(Constant.RESPONSE_CODES.NOT_FOUND)
           .json({ error: Constant.ERROR_MESSAGES.USER_NOT_FOUND });
       } else {
-        const linkToken = await GlobalUtils.generateToken(userIsExist.id, "1h");
+        const linkToken = await GlobalUtils.generateToken(
+          { id: userIsExist.id },
+          "1h"
+        );
         const resetPasswordLink = `${process.env.DEFAULT_URL}/user/verify-link/${linkToken}`;
-
         const emailData = {
           to: req.body.email,
           subject: "User Forgot Password",
@@ -95,8 +103,29 @@ export class UserMiddleware {
   public resetPassword = async (req: any, res: Response, next: any) => {
     try {
       const link = req.params.link;
-      console.log(link);
+      const decode = await GlobalUtils.verifyToken(link);
+      if (decode) {
+        const user = await UserUtils.findUser({ id: decode.id });
+        if (user) {
+          let { password } = req.body;
+          password = await GlobalUtils.encryptPassword(password);
+          await UserUtils.updateDetails(
+            { password: password },
+            { id: user.id }
+          );
+          return next();
+        } else {
+          return res
+            .status(Constant.RESPONSE_CODES.NOT_FOUND)
+            .json({ error: Constant.ERROR_MESSAGES.USER_NOT_FOUND });
+        }
+      } else {
+        return res
+          .status(Constant.RESPONSE_CODES.BAD_REQUEST)
+          .json({ error: Constant.ERROR_MESSAGES.SESSION_EXPIRED });
+      }
     } catch (error) {
+      console.log(error);
       return res
         .status(Constant.RESPONSE_CODES.INTERNAL_SERVER_ERROR)
         .json({ error: Constant.ERROR_MESSAGES.INTERNAL_SERVER_ERROR });

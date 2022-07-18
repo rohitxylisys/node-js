@@ -19,6 +19,13 @@ export class UserUtils {
     }
   };
 
+  public static getTokenFiled = async (data: any) => {
+    delete data.password;
+    delete data.token;
+    return data;
+  };
+  
+
   public static updateDetails = async (data: any, condition: any) => {
     const result = await User.update(data, {
       where: condition,

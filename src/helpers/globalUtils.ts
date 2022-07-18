@@ -5,25 +5,35 @@ const nodemailer = require("nodemailer");
 const saltRounds = 10;
 export class GlobalUtils {
   public static encryptPassword = async (password: string) => {
-    const encryptedPassword = await bcrypt.hash(
-      process.env.ENCRYPT_PASSWORD_STRING,
-      saltRounds
-    );
+    const encryptedPassword = await bcrypt.hash(password, saltRounds);
     return encryptedPassword;
   };
 
-  public static comparePassword = async (encyptedPassword: string) => {
-    const isPasswordCorrect = await bcrypt.compare(
-      process.env.ENCRYPT_PASSWORD_STRING,
-      encyptedPassword
-    );
+  public static comparePassword = async (
+    password: string,
+    hashedPassword: string
+  ) => {
+    const isPasswordCorrect = await bcrypt.compare(password, hashedPassword);
     return isPasswordCorrect;
   };
 
   public static generateToken = async (data: any, expire?: string) => {
-    return jwt.sign(data, process.env.TOKEN_SECRET_KEY, {
-      expiresIn: expire ? expire : "",
-    });
+    try {
+      return await jwt.sign(data, process.env.TOKEN_SECRET_KEY, {
+        expiresIn: expire ? expire : "90d",
+      });
+    } catch (error) {
+      return false;
+    }
+  };
+
+  public static verifyToken = async (data: any) => {
+    try {
+      const decodeToken = await jwt.verify(data, process.env.TOKEN_SECRET_KEY);
+      return decodeToken;
+    } catch (error) {
+      return false;
+    }
   };
 
   public static sendMail(data: any) {
